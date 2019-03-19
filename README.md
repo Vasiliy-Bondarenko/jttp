@@ -41,3 +41,6 @@ try {
     return;
 }
 ```
+
+## Package inspired by
+[Zttp by Adam Wathan](https://github.com/kitetail/zttp)

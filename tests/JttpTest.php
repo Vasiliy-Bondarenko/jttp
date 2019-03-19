@@ -3,6 +3,7 @@
 use PHPUnit\Framework\TestCase;
 use Jttp\JsonException;
 use Jttp\Jttp;
+use stdClass;
 
 class JttpTest extends TestCase
 {
@@ -25,7 +26,9 @@ class JttpTest extends TestCase
     public function get_ok()
     {
         // action
-        $result = (new Jttp)->url("https://httpbin.org/get")->get();
+        $result = (new Jttp)
+            ->url("https://httpbin.org/get")
+            ->get();
 
         // assertions
         $this->assertTrue($result->isOk());
@@ -37,7 +40,9 @@ class JttpTest extends TestCase
     public function if_bad_json_returned_body_ok_json_throws()
     {
         // action
-        $result = (new Jttp)->get("https://httpbin.org/base64/SFRUUEJJTiBpcyBhd2Vzb21l");
+        $result = (new Jttp)
+            ->url("https://httpbin.org/base64/SFRUUEJJTiBpcyBhd2Vzb21l")
+            ->get();
 
         // assertions
         $this->assertTrue($result->isOk());
@@ -50,26 +55,81 @@ class JttpTest extends TestCase
     public function get_404()
     {
         // action
-        $result = (new Jttp)->get("https://httpbin.org/status/404");
+        $result = (new Jttp)
+            ->url("https://httpbin.org/status/404")
+            ->get();
 
         // assertions
         $this->assertFalse($result->isOk());
         $this->assertEquals(404, $result->status());
     }
 
-    /** @test */
-    public function post_ok()
+    public function post_data()
+    {
+        $obj = new stdClass();
+        $obj->prop = "property";
+
+        return [
+            [
+                [
+                    "field_one" => "value_one",
+                    "field_two" => "value_two",
+                ],
+                [
+                    "field_one" => "value_one",
+                    "field_two" => "value_two",
+                ]
+            ],
+            [null, null],
+            [false, false],
+            ["string", "string"],
+            [$obj, ["prop" => "property"]]
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider post_data
+     */
+    public function post_as_json($send_data, $received_data)
     {
         // action
-        $result = (new Jttp)->url("https://httpbin.org/post")->post();
+        $result = (new Jttp)
+            ->url("https://httpbin.org/post")
+            ->post($send_data);
+
+        // assertions
+        $this->assertTrue($result->isOk());
+        $this->assertInternalType("array", $result->json());
+        $this->assertEquals($received_data, json_decode($result->json()["data"], true));
+        $this->assertEquals("application/json", $result->json()["headers"]["Content-Type"]);
+    }
+
+    /** @test */
+    public function post_as_multipart()
+    {
+        // given
+        $data = [
+            "field_one" => "value_one",
+            "field_two" => "value_two",
+        ];
+
+        // action
+        $result = (new Jttp)
+            ->url("https://httpbin.org/post")
+            ->asMultipart()
+            ->post($data);
 
         // assertions
         $this->assertTrue($result->isOk());
         $this->assertInternalType("array", $result->json());
         $this->assertEquals("httpbin.org", $result->json()["headers"]["Host"]);
+        $this->assertEquals($data, $result->json()["form"]);
+        $this->assertStringStartsWith("multipart/form-data; boundary=", $result->json()["headers"]["Content-Type"]);
     }
 
     // can post arbitrary data
+    // get with data
     // return binary data
 }
 

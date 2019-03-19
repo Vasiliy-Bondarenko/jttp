@@ -10,5 +10,11 @@ interface TransportInterface
      * @return Response
      * @throws CurlException
      */
-    public function call(string $method, string $url, $data = null, bool $verbose = false);
+    public function call(
+        string $method,
+        string $url,
+        string $body_format,
+        $data = null,
+        bool $verbose = false
+    );
 }

@@ -9,7 +9,13 @@ class Curl implements TransportInterface
      * @return Response
      * @throws CurlException
      */
-    public function call(string $method, string $url, $data = null, bool $verbose = false)
+    public function call(
+        string $method,
+        string $url,
+        string $body_format,
+        $data = null,
+        bool $verbose = false
+    )
     {
         $ch = curl_init();
         if (!$ch) {
@@ -23,10 +29,16 @@ class Curl implements TransportInterface
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-//        curl_setopt($ch, CURLOPT_POST, count($data));
-//        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        if ($method === "post") {
+            curl_setopt($ch, CURLOPT_POST, is_array($data) ? count($data) : 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        }
         curl_setopt($ch, CURLOPT_VERBOSE, $verbose);
         curl_setopt($ch, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: ' . $body_format,
+//                'Content-Length: ' . strlen($data_string))
+        ]);
 
         // execute call to API
         $response = curl_exec($ch);

@@ -6,13 +6,14 @@ class Jttp
     protected $transport;
     /** @var array */
     protected $urls = [];
+    protected $body_format = BodyFormat::JSON;
 
     /**
      * @param TransportInterface $transport - you can inject your own implementation of transport. Curl will be used by default.
      */
     public function __construct(TransportInterface $transport = null)
     {
-        $this->transport      = is_null($transport) ? new Curl() : $transport;
+        $this->transport = is_null($transport) ? new Curl() : $transport;
     }
 
     public function url(string $url)
@@ -23,7 +24,18 @@ class Jttp
 
     public function get(bool $verbose = false)
     {
-        return $this->call("get", $this->urls[0], null, $verbose);
+        return $this->call("get", null, $verbose);
+    }
+
+    public function post($data, bool $verbose = false)
+    {
+        return $this->call("post", $data, $verbose);
+    }
+
+    public function asMultipart()
+    {
+        $this->body_format = BodyFormat::MULTIPART;
+        return $this;
     }
 
     /**
@@ -33,8 +45,16 @@ class Jttp
      * @return Response
      * @throws JttpException
      */
-    protected function call(string $method, string $endpoint, $data = null, bool $verbose = false)
+    protected function call(string $method, $data = null, bool $verbose = false)
     {
-        return $this->transport->call($method, $endpoint, $data, $verbose);
+        if (!isset($this->urls[0])) {
+            throw new JttpException("You must call url() method first");
+        }
+
+        if ($this->body_format === BodyFormat::JSON) {
+            $data = json_encode($data);
+        }
+
+        return $this->transport->call($method, $this->urls[0], $this->body_format, $data, $verbose);
     }
 }

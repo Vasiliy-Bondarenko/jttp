@@ -1,0 +1,37 @@
+{
+    "name": "jttp/jttp",
+    "type": "library",
+    "description": "Simple HTTP client on PHP.",
+    "keywords": [
+        "PHP",
+        "HTTP",
+        "API",
+        "JSON"
+    ],
+    "homepage": "https://github.com/Vasiliy-Bondarenko/jttp",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Vasiliy Bondarenko",
+            "email": "vabondarenko@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "ext-curl": "*",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "5.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jttp\\": "src/",
+            "Tests\\": "tests/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    }
+}

@@ -16,5 +16,5 @@ interface TransportInterface
         string $body_format,
         $data = null,
         bool $verbose = false
-    );
+    ): Response;
 }

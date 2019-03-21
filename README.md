@@ -4,7 +4,7 @@
 Work in progress!
 
 ## Motivation
-Create simple to use http client with minimum dependencies - you can read whole code in a few minutes.
+Create simple to use http client with minimum dependencies.
 
 - Laravel style
 - Nice fluid interface
@@ -17,6 +17,8 @@ Create simple to use http client with minimum dependencies - you can read whole 
 - Documentation embedded in docblocks. You do not need to read documentation in advance.
 - Fully tested
 - Easily extendable
+- Follow redirects by default
+- Throw exception on any error (non-2xx status, too many redirects, json_decode error, etc)
 
 ## Examples
 
@@ -41,6 +43,13 @@ try {
     return;
 }
 ```
+
+```
+maxRedirects(5) // follow maximum 5 redirects
+doNotFollowRedirects()
+
+```
+
 
 ## Package inspired by
 [Zttp by Adam Wathan](https://github.com/kitetail/zttp)

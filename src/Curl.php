@@ -15,7 +15,7 @@ class Curl implements TransportInterface
         string $body_format,
         $data = null,
         bool $verbose = false
-    )
+    ): Response
     {
         $ch = curl_init();
         if (!$ch) {

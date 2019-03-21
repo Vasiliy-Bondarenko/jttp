@@ -2,7 +2,9 @@
 
 require_once "vendor/autoload.php";
 
+use Jttp\JsonException;
 use Jttp\Jttp;
+use Jttp\TooManyRedirectsException;
 
 $response = (new Jttp)
     ->url("https://httpbin.org/get")
@@ -19,7 +21,10 @@ echo "Body: " . $response->body() . "\n\n";
 echo "Json: ";
 try {
     var_dump($response->json());
-} catch (\Jttp\JsonException $e) {
+} catch (JsonException $e) {
     echo "Json decode error: " . $e->getMessage() . "\n";
     return;
+} catch (TooManyRedirectsException $e) {
+    echo "It was too many redirects. Last response: ";
+    var_dump($e->response);
 }

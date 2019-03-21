@@ -2,15 +2,18 @@
 
 class Response
 {
+    /** @var int */
     protected $statusCode;
-    protected $headers;
+    /** @var array */
+    protected $headers = [];
+    /** @var string */
     protected $body;
 
     public function __construct($statusCode, $headers, $body)
     {
         $this->statusCode = $statusCode;
-        $this->headers = $headers;
-        $this->body = $body;
+        $this->headers    = $this->parseHeaders($headers);
+        $this->body       = $body;
     }
 
     /**
@@ -65,11 +68,36 @@ class Response
     }
 
     /**
-     * 2xx and 3xx are Ok.
+     * only 2xx status is Ok.
+     * @param array $code_classes = for 2xx and 3xx codes to be ok pass [2,3]
      * @return bool
      */
-    public function isOk(): bool
+    public function isOk($code_classes = [2]): bool
     {
-        return in_array(intdiv($this->statusCode, 100), [2,3]);
+        return in_array(intdiv($this->statusCode, 100), $code_classes);
+    }
+
+    /**
+     * @param string $header
+     * @return string|null
+     */
+    public function header(string $header)
+    {
+        return $this->headers[$header] ?? null;
+    }
+
+    protected function parseHeaders(string $headers)
+    {
+        $headers = trim($headers); // trim empty line in the end
+        $rows = explode("\r\n", $headers); // split into rows
+
+        $headers = [];
+        foreach ($rows as $index => $header) {
+            if ($index === 0) continue; // skip status code on the first line
+            list($name, $value) = explode(": ", $header);
+            $headers[$name] = $value;
+        }
+
+        return $headers;
     }
 }

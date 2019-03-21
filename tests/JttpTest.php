@@ -1,5 +1,6 @@
 <?php namespace Tests;
 
+use Jttp\TooManyRedirectsException;
 use PHPUnit\Framework\TestCase;
 use Jttp\JsonException;
 use Jttp\Jttp;
@@ -64,7 +65,11 @@ class JttpTest extends TestCase
         $this->assertEquals(404, $result->status());
     }
 
-    public function post_data()
+    /**
+     * datasets for post_as_json test
+     * @return array
+     */
+    public function post_data_provider()
     {
         $obj = new stdClass();
         $obj->prop = "property";
@@ -89,7 +94,7 @@ class JttpTest extends TestCase
 
     /**
      * @test
-     * @dataProvider post_data
+     * @dataProvider post_data_provider
      */
     public function post_as_json($send_data, $received_data)
     {
@@ -122,14 +127,61 @@ class JttpTest extends TestCase
 
         // assertions
         $this->assertTrue($result->isOk());
+        $this->assertEquals("application/json", $result->header("Content-Type"));
         $this->assertInternalType("array", $result->json());
         $this->assertEquals("httpbin.org", $result->json()["headers"]["Host"]);
         $this->assertEquals($data, $result->json()["form"]);
         $this->assertStringStartsWith("multipart/form-data; boundary=", $result->json()["headers"]["Content-Type"]);
     }
 
-    // can post arbitrary data
-    // get with data
-    // return binary data
+    /** @test */
+    public function follow_redirect()
+    {
+        // action
+        $result = (new Jttp)
+            ->url("https://httpbin.org/absolute-redirect/1")
+            ->get();
+
+        // assertions
+        $this->assertTrue($result->isOk());
+    }
+
+    /** @test */
+    public function follow_redirect_x_times()
+    {
+        try {
+            // action
+            $result = (new Jttp)
+                ->url("https://httpbin.org/absolute-redirect/2")
+                ->maxRedirects(1)
+                ->get();
+        } catch (TooManyRedirectsException $e) {
+            $result = $e->response;
+            // assertions
+            $this->assertFalse($result->isOk());
+            $this->assertEquals(302, $result->status());
+            $this->assertEquals("http://httpbin.org/get", $result->header("Location"));
+            return;
+        }
+
+        $this->fail("TooManyRedirectsException expected, but not thrown");
+    }
+
+    /** @test */
+    public function doNotFollowRedirects()
+    {
+        $this->expectException(TooManyRedirectsException::class);
+
+        // action
+        $result = (new Jttp)
+            ->url("https://httpbin.org/absolute-redirect/1")
+            ->doNotFollowRedirects()
+            ->get();
+
+        // assertions
+        $this->assertFalse($result->isOk());
+        $this->assertEquals(302, $result->status());
+        $this->assertEquals("http://httpbin.org/get", $result->header("Location"));
+    }
 }
 

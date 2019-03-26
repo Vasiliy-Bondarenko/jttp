@@ -8,6 +8,9 @@ class Jttp
     protected $urls = [];
     protected $body_format = BodyFormat::JSON;
     protected $redirects = 5;
+    /** @var resource */
+    protected $log_handler;
+    protected $verbose = false;
 
     /**
      * @param TransportInterface $transport - you can inject your own implementation of transport. Curl will be used by default.
@@ -23,14 +26,14 @@ class Jttp
         return $this;
     }
 
-    public function get(bool $verbose = false)
+    public function get()
     {
-        return $this->call("get", null, $verbose);
+        return $this->call("get", null);
     }
 
-    public function post($data, bool $verbose = false)
+    public function post($data)
     {
-        return $this->call("post", $data, $verbose);
+        return $this->call("post", $data);
     }
 
     public function asMultipart()
@@ -61,13 +64,30 @@ class Jttp
     }
 
     /**
+     * Enables logging debug information to stderr
+     * @return $this
+     */
+    public function logToStderr()
+    {
+        $this->verbose = true;
+        return $this;
+    }
+
+    public function logToFile(string $file)
+    {
+        $this->verbose = true;
+        $this->log_handler = fopen($file, 'w+');
+        return $this;
+    }
+
+    /**
      * @param string $method
      * @param string $endpoint
      * @param mixed $data
      * @return Response
      * @throws JttpException
      */
-    protected function call(string $method, $data = null, bool $verbose = false): Response
+    protected function call(string $method, $data = null): Response
     {
         if (!isset($this->urls[0])) {
             throw new JttpException("You must call url() method first");
@@ -77,19 +97,19 @@ class Jttp
             $data = json_encode($data);
         }
 
-        return $this->call_url($this->urls[0], $method, $data, $verbose);
+        return $this->call_url($this->urls[0], $method, $data);
     }
 
-    protected function call_url(string $url, string $method, $data = null, bool $verbose = false): Response
+    protected function call_url(string $url, string $method, $data = null): Response
     {
-        $response = $this->transport->call($method, $url, $this->body_format, $data, $verbose);
+        $response = $this->transport->call($method, $url, $this->body_format, $data, $this->verbose, $this->log_handler);
 
         if ($response->status() === 302) { // fixme
             if ($this->redirects == 0) {
                 throw new TooManyRedirectsException($response, "Too many redirects.");
             }
             $this->redirects--;
-            return $this->call_url($response->header("Location"), $method, $data, $verbose);
+            return $this->call_url($response->header("Location"), $method, $data);
         }
 
         if (intdiv($response->status(), 100) !== 2) {

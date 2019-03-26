@@ -3,7 +3,8 @@
 class Curl implements TransportInterface
 {
     /**
-     * @param $url
+     * @param string $method "get"|"post"|"put"|...
+     * @param string $url
      * @param mixed $data
      * @param bool $verbose
      * @return Response
@@ -14,7 +15,8 @@ class Curl implements TransportInterface
         string $url,
         string $body_format,
         $data = null,
-        bool $verbose = false
+        bool $verbose = false,
+        $log_handler = null
     ): Response
     {
         $ch = curl_init();
@@ -34,6 +36,9 @@ class Curl implements TransportInterface
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         }
         curl_setopt($ch, CURLOPT_VERBOSE, $verbose);
+        if ($log_handler) {
+            curl_setopt($ch, CURLOPT_STDERR, $log_handler);
+        }
         curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Content-Type: ' . $body_format,

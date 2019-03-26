@@ -4,7 +4,8 @@
 - [x] doNotFollowRedirects()  
 - [x] Throw on too many redirects
 - [x] Throw on !2xx response
-- Extract verbose arg to method call like (beVerbose())
+- [x] Log to file
+- [x] Extract verbose arg to method call like (log())
 - Post as FORM_URLENCODED
 - Post as TEXT?..
 - Put/patch/delete

@@ -15,6 +15,7 @@ interface TransportInterface
         string $url,
         string $body_format,
         $data = null,
-        bool $verbose = false
+        bool $verbose = false,
+        $log_handler = null
     ): Response;
 }

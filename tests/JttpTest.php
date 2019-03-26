@@ -190,5 +190,36 @@ class JttpTest extends TestCase
         $this->assertEquals(302, $result->status());
         $this->assertEquals("http://httpbin.org/get", $result->header("Location"));
     }
+
+    /** @test */
+    public function log_to_file()
+    {
+        $file = __DIR__ . "/log.txt";
+        if (file_exists($file)) {
+            unlink($file);
+        }
+
+        // action
+        (new Jttp)
+            ->url("https://httpbin.org/get")
+            ->logToFile($file)
+            ->get();
+
+        // assertions
+        $this->assertFileExists($file);
+        $this->assertTrue((bool)strstr(file_get_contents($file), "httpbin.org"));
+    }
+
+    /** @test */
+    public function log_to_stderr()
+    {
+        // this will output to stderr, i don't know how to grab it and check from here. are you?..
+
+        // action
+        (new Jttp)
+            ->url("https://httpbin.org/get")
+            ->logToStderr()
+            ->get();
+    }
 }
 

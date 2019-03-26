@@ -92,6 +92,10 @@ class Jttp
             return $this->call_url($response->header("Location"), $method, $data, $verbose);
         }
 
+        if (intdiv($response->status(), 100) !== 2) {
+            throw new HttpException($response, "Expected results with 2xx status code. Returned: {$response->status()}");
+        }
+
         return $response;
     }
 }

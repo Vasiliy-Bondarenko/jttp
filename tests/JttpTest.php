@@ -1,5 +1,6 @@
 <?php namespace Tests;
 
+use Jttp\HttpException;
 use Jttp\TooManyRedirectsException;
 use PHPUnit\Framework\TestCase;
 use Jttp\JsonException;
@@ -55,14 +56,20 @@ class JttpTest extends TestCase
     /** @test */
     public function get_404()
     {
-        // action
-        $result = (new Jttp)
-            ->url("https://httpbin.org/status/404")
-            ->get();
+        try {
+            // action
+            $result = (new Jttp)
+                ->url("https://httpbin.org/status/404")
+                ->get();
+        } catch (HttpException $e) {
+            $result = $e->response;
+            // assertions
+            $this->assertFalse($result->isOk());
+            $this->assertEquals(404, $result->status());
+            return;
+        }
 
-        // assertions
-        $this->assertFalse($result->isOk());
-        $this->assertEquals(404, $result->status());
+        $this->fail("HttpException expected, but not thrown");
     }
 
     /**

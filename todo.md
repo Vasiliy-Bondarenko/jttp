@@ -7,8 +7,9 @@
 - [x] Log to file
 - [x] Extract verbose arg to method call like (log())
 - [x] All http verbs
+- [ ] Rethrow CurlException
+- [ ] Other then 302 redirect codes
 - [ ] Post as FORM_URLENCODED
 - [ ] Post as TEXT?..
-- [ ] Put/patch/delete
 - [ ] Get with data
 - [ ] Return binary data

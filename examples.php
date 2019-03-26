@@ -2,29 +2,19 @@
 
 require_once "vendor/autoload.php";
 
-use Jttp\JsonException;
 use Jttp\Jttp;
-use Jttp\TooManyRedirectsException;
+use Jttp\JttpException;
 
-$response = (new Jttp)
-    ->url("https://httpbin.org/get")
-    ->get();
-
-if (!$response->isOk()) {
-    echo "Error: Can't get data\n";
-    return;
-}
-
-echo "Status: " . $response->status() . "\n\n";
-echo "Headers: " . $response->headers() . "\n\n";
-echo "Body: " . $response->body() . "\n\n";
-echo "Json: ";
 try {
-    var_dump($response->json());
-} catch (JsonException $e) {
-    echo "Json decode error: " . $e->getMessage() . "\n";
-    return;
-} catch (TooManyRedirectsException $e) {
-    echo "It was too many redirects. Last response: ";
-    var_dump($e->response);
+    $response = (new Jttp)
+        ->url("https://httpbin.org/get")
+        ->get();
+
+    echo "Status: " . $response->status() . "\n\n";
+    echo "Headers: " . var_export($response->headers(), true) . "\n\n";
+    echo "Body: " . $response->body() . "\n\n";
+    echo "Json: " . var_export($response->json(), true) . "\n\n";
+} catch (JttpException $e) {
+    // it will catch all errors here including non 2xx response codes and json_decode errors
+    echo "Error: {$e->getMessage()}\n";
 }

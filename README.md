@@ -20,34 +20,43 @@ Create simple to use http client with minimum dependencies.
 - Follow redirects by default
 - Throw exception on any error (non-2xx status, too many redirects, json_decode error, etc)
 
-## Examples
+## Simple example
 
 ```php
-$response = (new Jttp)
-    ->url("https://httpbin.org/get")
-    ->get();
+require_once "vendor/autoload.php";
 
-if (!$response->isOk()) {
-    echo "Error: Can't get data\n";
-    return;
-}
+use Jttp\Jttp;
+use Jttp\JttpException;
 
-echo "Status: " . $response->status() . "\n\n";
-echo "Headers: " . $response->headers() . "\n\n";
-echo "Body: " . $response->body() . "\n\n";
-echo "Json: ";
 try {
-    var_dump($response->json());
-} catch (\VABondarenko\JsonException $e) {
-    echo "Json decode error: " . $e->getMessage() "\n";
-    return;
+    $response = (new Jttp)
+        ->url("https://httpbin.org/get")
+        ->get();
+
+    echo "Status: " . $response->status() . "\n\n";
+    echo "Headers: " . var_export($response->headers(), true) . "\n\n";
+    echo "Body: " . $response->body() . "\n\n";
+    echo "Json: " . var_export($response->json(), true) . "\n\n";
+} catch (JttpException $e) {
+    // it will catch all errors here including non 2xx response codes and json_decode errors
+    echo "Error: {$e->getMessage()}\n";
 }
 ```
-
+## Other fluid methods
 ```
-maxRedirects(5) // follow maximum 5 redirects
-doNotFollowRedirects()
-
+->maxRedirects(5) // follow maximum 5 redirects
+->doNotFollowRedirects()
+->asMultipart() // send request as multipart/form-data
+->logToStderr() // enables logging debug information to stderr
+->logToFile($filename = "") // log to file
+```
+## All [http verbs](https://www.restapitutorial.com/lessons/httpmethods.html)
+```
+->get()
+->post($data = null)
+->put($data = null)
+->patch($data = null)
+->delete($data = null)
 ```
 
 

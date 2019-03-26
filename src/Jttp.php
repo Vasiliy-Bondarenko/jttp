@@ -26,26 +26,65 @@ class Jttp
         return $this;
     }
 
+    /**
+     * @return Response
+     * @throws CurlException
+     * @throws HttpException
+     * @throws JttpException
+     * @throws TooManyRedirectsException
+     */
     public function get()
     {
         return $this->call("get", null);
     }
 
+    /**
+     * @param $data
+     * @return Response
+     * @throws CurlException
+     * @throws HttpException
+     * @throws JttpException
+     * @throws TooManyRedirectsException
+     */
     public function post($data)
     {
         return $this->call("post", $data);
     }
 
+    /**
+     * @param $data
+     * @return Response
+     * @throws CurlException
+     * @throws HttpException
+     * @throws JttpException
+     * @throws TooManyRedirectsException
+     */
     public function patch($data)
     {
         return $this->call("patch", $data);
     }
 
+    /**
+     * @param $data
+     * @return Response
+     * @throws CurlException
+     * @throws HttpException
+     * @throws JttpException
+     * @throws TooManyRedirectsException
+     */
     public function delete($data)
     {
         return $this->call("delete", $data);
     }
 
+    /**
+     * @param $data
+     * @return Response
+     * @throws CurlException
+     * @throws HttpException
+     * @throws JttpException
+     * @throws TooManyRedirectsException
+     */
     public function put($data)
     {
         return $this->call("put", $data);
@@ -97,10 +136,12 @@ class Jttp
 
     /**
      * @param string $method
-     * @param string $endpoint
-     * @param mixed $data
+     * @param null $data
      * @return Response
+     * @throws CurlException
+     * @throws HttpException
      * @throws JttpException
+     * @throws TooManyRedirectsException
      */
     protected function call(string $method, $data = null): Response
     {
@@ -115,6 +156,15 @@ class Jttp
         return $this->call_url($this->urls[0], $method, $data);
     }
 
+    /**
+     * @param string $url
+     * @param string $method
+     * @param null $data
+     * @return Response
+     * @throws CurlException
+     * @throws HttpException
+     * @throws TooManyRedirectsException
+     */
     protected function call_url(string $url, string $method, $data = null): Response
     {
         $response = $this->transport->call($method, $url, $this->body_format, $data, $this->verbose, $this->log_handler);

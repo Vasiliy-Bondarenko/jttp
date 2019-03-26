@@ -31,7 +31,8 @@ class Curl implements TransportInterface
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        if ($method === "post") {
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+        if ($method !== "get") {
             curl_setopt($ch, CURLOPT_POST, is_array($data) ? count($data) : 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         }

@@ -117,6 +117,34 @@ class JttpTest extends TestCase
         $this->assertEquals("application/json", $result->json()["headers"]["Content-Type"]);
     }
 
+    public function http_verbs_data_provider()
+    {
+        return [
+            ["patch"],
+            ["delete"],
+            ["put"],
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider http_verbs_data_provider
+     */
+    public function http_verbs($verb)
+    {
+        $send_data = [1,2];
+        
+        // action
+        $result = (new Jttp)
+            ->url("https://httpbin.org/{$verb}")
+            ->$verb($send_data);
+
+        // assertions
+        $this->assertTrue($result->isOk());
+        $this->assertInternalType("array", $result->json());
+        $this->assertEquals($send_data, json_decode($result->json()["data"], true));
+    }
+
     /** @test */
     public function post_as_multipart()
     {

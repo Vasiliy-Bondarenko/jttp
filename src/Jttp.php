@@ -36,6 +36,21 @@ class Jttp
         return $this->call("post", $data);
     }
 
+    public function patch($data)
+    {
+        return $this->call("patch", $data);
+    }
+
+    public function delete($data)
+    {
+        return $this->call("delete", $data);
+    }
+
+    public function put($data)
+    {
+        return $this->call("put", $data);
+    }
+
     public function asMultipart()
     {
         $this->body_format = BodyFormat::MULTIPART;

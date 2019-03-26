@@ -6,8 +6,9 @@
 - [x] Throw on !2xx response
 - [x] Log to file
 - [x] Extract verbose arg to method call like (log())
-- Post as FORM_URLENCODED
-- Post as TEXT?..
-- Put/patch/delete
-- Get with data
-- Return binary data
+- [x] All http verbs
+- [ ] Post as FORM_URLENCODED
+- [ ] Post as TEXT?..
+- [ ] Put/patch/delete
+- [ ] Get with data
+- [ ] Return binary data

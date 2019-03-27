@@ -7,6 +7,7 @@ Work in progress!
 Create simple to use http client with minimum dependencies.
 
 - Laravel style
+- No dependencies
 - Nice fluid interface
 - JSON by default
 - Code completion

@@ -12,12 +12,19 @@ class Jttp
     protected $log_handler;
     protected $verbose = false;
 
-    /**
-     * @param TransportInterface $transport - you can inject your own implementation of transport. Curl will be used by default.
-     */
-    public function __construct(TransportInterface $transport = null)
+    public function __construct()
     {
-        $this->transport = is_null($transport) ? new Curl() : $transport;
+        $this->transport       = new Curl();
+        $this->response_object = new Response();
+    }
+
+    /**
+     * you can inject your own implementation of transport. Curl will be used by default.
+     */
+    public function useTransport(TransportInterface $transport): Jttp
+    {
+        $this->transport = $transport;
+        return $this;
     }
 
     public function url(string $url)
@@ -129,7 +136,7 @@ class Jttp
 
     public function logToFile(string $file)
     {
-        $this->verbose = true;
+        $this->verbose     = true;
         $this->log_handler = fopen($file, 'w+');
         return $this;
     }
@@ -167,6 +174,8 @@ class Jttp
      */
     protected function call_url(string $url, string $method, $data = null): Response
     {
+        $this->transport->setResponseObject($this->response_object);
+
         $response = $this->transport->call($method, $url, $this->body_format, $data, $this->verbose, $this->log_handler);
 
         if (StatusCodes::isSafeToAutoRedirect($response->status())) {
@@ -183,5 +192,11 @@ class Jttp
         }
 
         return $response;
+    }
+
+    public function useResponseObject(Response $response_object): Jttp
+    {
+        $this->response_object = $response_object;
+        return $this;
     }
 }

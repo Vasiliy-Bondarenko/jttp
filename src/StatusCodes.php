@@ -167,4 +167,9 @@ class StatusCodes
     {
         return intdiv($status, 100) === 2;
     }
+
+    public static function toText(int $status): string
+    {
+        return static::$statusTexts[$status];
+    }
 }

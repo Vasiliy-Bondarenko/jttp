@@ -36,6 +36,8 @@ class JttpTest extends TestCase
 
         // assertions
         $this->assertTrue($result->isOk());
+        $this->assertEquals(200, $result->status());
+        $this->assertEquals("OK", $result->statusText());
         $this->assertInternalType("array", $result->json());
         $this->assertEquals("httpbin.org", $result->json()["headers"]["Host"]);
     }
@@ -80,7 +82,7 @@ class JttpTest extends TestCase
      */
     public function post_data_provider()
     {
-        $obj = new stdClass();
+        $obj       = new stdClass();
         $obj->prop = "property";
 
         return [
@@ -134,8 +136,8 @@ class JttpTest extends TestCase
      */
     public function http_verbs($verb)
     {
-        $send_data = [1,2];
-        
+        $send_data = [1, 2];
+
         // action
         $result = (new Jttp)
             ->url("https://httpbin.org/{$verb}")
@@ -176,7 +178,7 @@ class JttpTest extends TestCase
     {
         // action
         $result = (new Jttp)
-            ->url("https://httpbin.org/absolute-redirect/1")  // 302 redirect
+            ->url("https://httpbin.org/absolute-redirect/1")// 302 redirect
             ->get();
 
         // assertions
@@ -265,7 +267,7 @@ class JttpTest extends TestCase
 
         // assertions
         $this->assertFileExists($file);
-        $this->assertTrue((bool)strstr(file_get_contents($file), "httpbin.org"));
+        $this->assertTrue((bool) strstr(file_get_contents($file), "httpbin.org"));
     }
 
     /** @test */
@@ -279,6 +281,7 @@ class JttpTest extends TestCase
             ->logToStderr()
             ->get();
     }
+
     /** @test */
     public function transport_exceptions()
     {
@@ -294,5 +297,22 @@ class JttpTest extends TestCase
 
         $this->fail("TransportException expected, but not thrown");
     }
-}
 
+    /** @test */
+    public function inject_custom_response_and_transport_classes()
+    {
+        // action
+        $response = (new Jttp)
+            ->useTransport(new CustomTransport())
+            ->useResponseObject(new CustomResponse())
+            ->url("https://httpbin.org/get")
+            ->get();
+
+        // assertions
+        $this->assertInstanceOf(CustomResponse::class, $response);
+        $this->assertEquals("ok", $response->customMethod());
+        $this->assertEquals("body", $response->body());
+        $this->assertEquals(["Header" => "value"], $response->headers());
+        $this->assertEquals(201, $response->status());
+    }
+}

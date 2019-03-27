@@ -9,13 +9,6 @@ class Response
     /** @var string */
     protected $body;
 
-    public function __construct($statusCode, $headers, $body)
-    {
-        $this->statusCode = $statusCode;
-        $this->headers    = $this->parseHeaders($headers);
-        $this->body       = $body;
-    }
-
     /**
      * @return int
      */
@@ -90,7 +83,7 @@ class Response
     {
         $headers = trim($headers); // trim empty line in the end
         $rows = explode("\r\n", $headers); // split into rows
-
+        
         $headers = [];
         foreach ($rows as $index => $header) {
             if ($index === 0) continue; // skip status code on the first line
@@ -99,5 +92,34 @@ class Response
         }
 
         return $headers;
+    }
+
+    public function statusText()
+    {
+        return StatusCodes::toText($this->status());
+    }
+
+    /**
+     * @param string $body
+     */
+    public function setBody(string $body)
+    {
+        $this->body = $body;
+        return $this;
+    }
+
+    public function setHeaders(string $headers)
+    {
+        $this->headers = $this->parseHeaders($headers);
+        return $this;
+    }
+
+    /**
+     * @param int $statusCode
+     */
+    public function setStatusCode(int $statusCode)
+    {
+        $this->statusCode = $statusCode;
+        return $this;
     }
 }

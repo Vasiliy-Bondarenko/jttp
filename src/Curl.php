@@ -3,6 +3,16 @@
 class Curl implements TransportInterface
 {
     /**
+     * @var Response
+     */
+    protected $response;
+
+    public function setResponseObject(Response $response)
+    {
+        $this->response = $response;
+    }
+
+    /**
      * @param string $method "get"|"post"|"put"|...
      * @param string $url
      * @param mixed $data
@@ -42,8 +52,8 @@ class Curl implements TransportInterface
         }
         curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: ' . $body_format,
-//                'Content-Length: ' . strlen($data_string))
+            'Content-Type: ' . $body_format,
+            //                'Content-Length: ' . strlen($data_string))
         ]);
 
         // execute call to API
@@ -62,6 +72,9 @@ class Curl implements TransportInterface
         // close resource handler
         curl_close($ch);
 
-        return new Response($httpcode,$headers, $body);
+        return $this->response
+            ->setBody($body)
+            ->setHeaders($headers)
+            ->setStatusCode($httpcode);
     }
 }

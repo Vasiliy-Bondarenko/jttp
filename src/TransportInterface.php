@@ -2,6 +2,8 @@
 
 interface TransportInterface
 {
+    public function setResponseObject(Response $response);
+
     /**
      * @param string $method
      * @param string $url

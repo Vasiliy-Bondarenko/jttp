@@ -9,8 +9,9 @@
 - [x] All http verbs
 - [x] Catch Curl errors
 - [x] Other then 302 redirect codes
-- [ ] Status code as text
-- [ ] Inject Response class to allow extension
+- [x] Status code as text
+- [x] Inject Response class to allow extension
+- [ ] URL rotation and fallbacks
 - [ ] Post as FORM_URLENCODED
 - [ ] Post as TEXT?..
 - [ ] Get with data

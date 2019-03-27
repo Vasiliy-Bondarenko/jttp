@@ -393,34 +393,4 @@ class JttpTest extends TestCase
         $this->assertGreaterThan(1, $runtime);
         $this->assertLessThan(1.2, $runtime);
     }
-
-
-
-//    /** @test */
-//    public function retry_requests_on_json_errors()
-//    {
-//        // having
-//        $response_error = (new Response())->setStatusCode(200)->setBody('{"status":"ok');
-//        $response_ok = (new Response())->setStatusCode(200)->setBody('{"status":"ok"');;
-//        $responses = [$response_error, $response_error, $response_ok];
-//
-//        // action
-//        $response = (new Jttp)
-//            ->useTransport((new TransportMock())->setResponses($responses))
-//            ->retries(2)
-//            ->url("https://httpbin.org/get")
-//            ->get();
-//
-//        $this->assertTrue($response->isOk());
-//
-//        // expecting next request too fail
-//        $this->expectException(HttpException::class);
-//
-//        // action
-//        $response = (new Jttp)
-//            ->useTransport((new TransportMock())->setResponses($responses))
-//            ->retries(1)
-//            ->url("https://httpbin.org/get")
-//            ->get();
-//    }
 }

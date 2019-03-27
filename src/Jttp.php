@@ -13,6 +13,8 @@ class Jttp
     protected $verbose = false;
     protected $retries = 0;
     protected $pauseBetweenRetriesMs = 0;
+    /** @var Response */
+    protected $response_object;
 
     public function __construct()
     {

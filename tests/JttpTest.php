@@ -176,11 +176,39 @@ class JttpTest extends TestCase
     {
         // action
         $result = (new Jttp)
-            ->url("https://httpbin.org/absolute-redirect/1")
+            ->url("https://httpbin.org/absolute-redirect/1")  // 302 redirect
             ->get();
 
         // assertions
         $this->assertTrue($result->isOk());
+
+        // action
+        $result = (new Jttp)
+            ->url("https://httpbin.org/redirect-to?url=https%3A%2F%2Fhttpbin.org%2Fget&status_code=301")
+            ->get();
+
+        // assertions
+        $this->assertTrue($result->isOk());
+
+
+        // action
+        $result = (new Jttp)
+            ->url("https://httpbin.org/redirect-to?url=https%3A%2F%2Fhttpbin.org%2Fget&status_code=307")
+            ->get();
+
+        // assertions
+        $this->assertTrue($result->isOk());
+
+        // action
+        try {
+            $result = (new Jttp)
+                ->url("https://httpbin.org/redirect-to?url=https%3A%2F%2Fhttpbin.org%2Fget&status_code=304")
+                ->get();
+        } catch (HttpException $e) {
+            return;
+        }
+
+        $this->fail("Expected HttpException because we don't want to make redirect on 304 code. Just throw.");
     }
 
     /** @test */

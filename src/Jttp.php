@@ -169,7 +169,7 @@ class Jttp
     {
         $response = $this->transport->call($method, $url, $this->body_format, $data, $this->verbose, $this->log_handler);
 
-        if ($response->status() === 302) { // fixme
+        if (StatusCodes::isSafeToAutoRedirect($response->status())) {
             if ($this->redirects == 0) {
                 throw new TooManyRedirectsException($response, "Too many redirects.");
             }
@@ -177,8 +177,9 @@ class Jttp
             return $this->call_url($response->header("Location"), $method, $data);
         }
 
-        if (intdiv($response->status(), 100) !== 2) {
-            throw new HttpException($response, "Expected results with 2xx status code. Returned: {$response->status()}");
+        if (!StatusCodes::isOk($response->status())) {
+            $redir = $this->redirects > 0 ? " or 3xx redirect" : "";
+            throw new HttpException($response, "Expected result with 2xx success status code{$redir}. Returned: {$response->status()}");
         }
 
         return $response;

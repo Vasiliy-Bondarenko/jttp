@@ -11,6 +11,10 @@
 - [x] Other then 302 redirect codes
 - [x] Status code as text
 - [x] Inject Response class to allow extension
+- [x] Retry same request a few times on recoverable errors
+    - [x] 500 errors 
+    - [x] DNS failures 
+    - [x] Retry with pause
 - [ ] URL rotation and fallbacks
 - [ ] Post as FORM_URLENCODED
 - [ ] Post as TEXT?..

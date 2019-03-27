@@ -1,18 +1,32 @@
 <?php namespace Tests;
 
-use Jttp\Response;
 use Jttp\TransportInterface;
+use Jttp\Response;
 
 class TransportMock implements TransportInterface
 {
-    protected $response;
+    /** @var []Response */
+    protected $mocked_responses = [];
+    protected $mocked_response_index = 0;
 
-    public function call(string $method, string $url, $data = null, bool $verbose = false)
+    /**
+     * @param []Response $responses
+     * @return $this
+     */
+    public function setResponses(array $responses)
     {
-        return $this->response;
+        $this->mocked_responses = $responses;
+        return $this;
     }
 
-    public function returnResponse(Response $response)
+    public function call(string $method, string $url, string $body_format, $data = null, bool $verbose = false, $log_handler = null): Response
+    {
+        $response = $this->mocked_responses[$this->mocked_response_index];
+        $this->mocked_response_index++;
+        return $response;
+    }
+
+    public function setResponseObject(Response $response)
     {
         $this->response = $response;
     }

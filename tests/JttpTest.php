@@ -1,5 +1,6 @@
 <?php namespace Tests;
 
+use Jttp\Response;
 use Jttp\TransportException;
 use Jttp\HttpException;
 use Jttp\JttpException;
@@ -315,4 +316,111 @@ class JttpTest extends TestCase
         $this->assertEquals(["Header" => "value"], $response->headers());
         $this->assertEquals(201, $response->status());
     }
+
+    /** @test */
+    public function retry_requests_on_remote_server_500_errors()
+    {
+        // having
+        $response_500 = (new Response())->setStatusCode(500);
+        $response_200 = (new Response())->setStatusCode(200);
+        $responses = [$response_500, $response_500, $response_500, $response_200];
+
+        // action
+        $response = (new Jttp)
+            ->useTransport((new TransportMock())->setResponses($responses))
+            ->retries(3)
+            ->url("https://httpbin.org/get")
+            ->get();
+
+        $this->assertTrue($response->isOk());
+
+        // expecting next request too fail
+        $this->expectException(HttpException::class);
+
+        // action
+        $response = (new Jttp)
+            ->useTransport((new TransportMock())->setResponses($responses))
+            ->retries(2)
+            ->url("https://httpbin.org/get")
+            ->get();
+    }
+
+    /** @test */
+    public function retry_requests_on_dns_errors()
+    {
+        // having
+        $response_200 = (new Response())->setStatusCode(200);
+
+        // action
+        $response = (new Jttp)
+            ->useTransport((new TransportMockFailingDNS())->setResponse($response_200)->failDnsTimes(2))
+            ->retries(3)
+            ->url("https://httpbin.org/get")
+            ->get();
+
+        $this->assertTrue($response->isOk());
+
+        // expecting next request too fail
+        $this->expectException(TransportException::class);
+
+        // action
+        $response = (new Jttp)
+            ->useTransport((new TransportMockFailingDNS())->setResponse($response_200)->failDnsTimes(2))
+            ->retries(1)
+            ->url("https://httpbin.org/get")
+            ->get();
+    }
+
+    /** @test */
+    public function pause_between_reties()
+    {
+        // having
+        $response_200 = (new Response())->setStatusCode(200);
+        $start = microtime(true);
+
+        // action
+        $response = (new Jttp)
+            ->useTransport((new TransportMockFailingDNS())->setResponse($response_200)->failDnsTimes(1))
+            ->retries(1)
+            ->pauseBetweenRetriesMs(1000)
+            ->url("https://httpbin.org/get")
+            ->get();
+
+        // assert
+        $this->assertTrue($response->isOk());
+        $runtime = microtime(true) - $start;
+        // should be close to 1.001 sec
+        $this->assertGreaterThan(1, $runtime);
+        $this->assertLessThan(1.2, $runtime);
+    }
+
+
+
+//    /** @test */
+//    public function retry_requests_on_json_errors()
+//    {
+//        // having
+//        $response_error = (new Response())->setStatusCode(200)->setBody('{"status":"ok');
+//        $response_ok = (new Response())->setStatusCode(200)->setBody('{"status":"ok"');;
+//        $responses = [$response_error, $response_error, $response_ok];
+//
+//        // action
+//        $response = (new Jttp)
+//            ->useTransport((new TransportMock())->setResponses($responses))
+//            ->retries(2)
+//            ->url("https://httpbin.org/get")
+//            ->get();
+//
+//        $this->assertTrue($response->isOk());
+//
+//        // expecting next request too fail
+//        $this->expectException(HttpException::class);
+//
+//        // action
+//        $response = (new Jttp)
+//            ->useTransport((new TransportMock())->setResponses($responses))
+//            ->retries(1)
+//            ->url("https://httpbin.org/get")
+//            ->get();
+//    }
 }

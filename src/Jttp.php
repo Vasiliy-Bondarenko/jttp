@@ -11,6 +11,8 @@ class Jttp
     /** @var resource */
     protected $log_handler;
     protected $verbose = false;
+    protected $retries = 0;
+    protected $pauseBetweenRetriesMs = 0;
 
     public function __construct()
     {
@@ -160,7 +162,38 @@ class Jttp
             $data = json_encode($data);
         }
 
-        return $this->call_url($this->urls[0], $method, $data);
+        return $this->call_url_with_retries($this->urls[0], $method, $data);
+    }
+
+    /**
+     * @param string $url
+     * @param string $method
+     * @param null $data
+     * @return Response
+     * @throws HttpException
+     * @throws JttpException
+     * @throws TransportException
+     */
+    protected function call_url_with_retries(string $url, string $method, $data = null): Response
+    {
+        try {
+            return $this->call_url($url, $method, $data);
+        } catch (JttpException $e) {
+            // check for non-fatal exceptions like 500 or DNS failure
+            if (!($e instanceof HttpException OR $e instanceof TransportException)) {
+                throw $e;
+            }
+
+            // run out of retries
+            if ($this->retries <= 0) {
+                throw $e;
+            }
+
+            // retry
+            $this->retries--;
+            usleep($this->pauseBetweenRetriesMs * 1000);
+            return $this->call_url_with_retries($url, $method, $data);
+        }
     }
 
     /**
@@ -177,7 +210,7 @@ class Jttp
         $this->transport->setResponseObject($this->response_object);
 
         $response = $this->transport->call($method, $url, $this->body_format, $data, $this->verbose, $this->log_handler);
-
+        
         if (StatusCodes::isSafeToAutoRedirect($response->status())) {
             if ($this->redirects == 0) {
                 throw new TooManyRedirectsException($response, "Too many redirects.");
@@ -197,6 +230,18 @@ class Jttp
     public function useResponseObject(Response $response_object): Jttp
     {
         $this->response_object = $response_object;
+        return $this;
+    }
+
+    public function retries(int $times): Jttp
+    {
+        $this->retries = $times;
+        return $this;
+    }
+
+    public function pauseBetweenRetriesMs(int $ms): Jttp
+    {
+        $this->pauseBetweenRetriesMs = $ms;
         return $this;
     }
 }

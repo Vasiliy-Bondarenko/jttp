@@ -9,6 +9,7 @@ class TransportMockFailingDNS implements TransportInterface
     /** @var Response */
     protected $response;
     protected $times = 0;
+    protected $call_count = 0;
 
     public function setResponse(Response $response): TransportMockFailingDNS
     {
@@ -24,6 +25,8 @@ class TransportMockFailingDNS implements TransportInterface
 
     public function call(string $method, string $url, string $body_format, $data = null, bool $verbose = false, $log_handler = null): Response
     {
+        $this->call_count++;
+
         if ($this->times > 0) {
             $this->times--;
             throw new TransportException("Could not resolve host ...");
@@ -35,5 +38,11 @@ class TransportMockFailingDNS implements TransportInterface
     public function setResponseObject(Response $response)
     {
         // not used
+    }
+
+
+    public function numberOfCalls(): int
+    {
+        return $this->call_count;
     }
 }

@@ -63,6 +63,33 @@ try {
 ->patch($data = null)
 ->delete($data = null)
 ```
+If you are making a few request or just want to have client with the same setting - you can prepare client and use it many times like this:
+```
+try {
+    // prepare http client
+    $client = (new Jttp)
+        ->retries(2)
+        ->redirects(5)
+        ->logToFile("log.txt")
+        ->pauseBetweenRetriesMs(1000);
+
+    // use it for first request
+    echo "Get request: \n";
+    $response = $client->url("https://httpbin.org/get")
+                       ->get();
+    var_dump($response->json());
+
+    // use for second request to other url
+    echo "Patch request: \n";
+    $response = $client->url("https://httpbin.org/patch")
+                       ->patch(["Key" => "value"]);
+    var_dump($response->json());
+
+} catch (JttpException $e) {
+    // it will catch all errors here including non 2xx response codes and json_decode errors, too many redirects, etc
+    echo "Error: {$e->getMessage()}\n";
+}
+```
 
 ## Advanced features
 You will know when you need them :)

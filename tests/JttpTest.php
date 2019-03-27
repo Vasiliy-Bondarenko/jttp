@@ -217,12 +217,25 @@ class JttpTest extends TestCase
     /** @test */
     public function follow_redirect_x_times()
     {
+        $client = (new Jttp)
+            ->url("https://httpbin.org/absolute-redirect/2")
+            ->redirects(2);
+
+        // action
+        $result = $client->get();
+
+        // assertions
+        $this->assertTrue($result->isOk());
+
+        // action -repeat to make sure redirect counter was reset
+        $result = $client->get();
+
+        // assertions
+        $this->assertTrue($result->isOk());
+
         try {
             // action
-            $result = (new Jttp)
-                ->url("https://httpbin.org/absolute-redirect/2")
-                ->maxRedirects(1)
-                ->get();
+            $result = $client->url("https://httpbin.org/absolute-redirect/3")->get();
         } catch (TooManyRedirectsException $e) {
             $result = $e->response;
             // assertions
@@ -392,5 +405,37 @@ class JttpTest extends TestCase
         // should be close to 1.001 sec
         $this->assertGreaterThan(1, $runtime);
         $this->assertLessThan(1.2, $runtime);
+    }
+
+    /** @test */
+    public function reset_counter_to_allow_client_reuse()
+    {
+        // having
+        $response_200 = (new Response())->setStatusCode(200);
+        $transport = (new TransportMockFailingDNS())->setResponse($response_200)->failDnsTimes(2);
+        $client    = (new Jttp)
+            ->useTransport($transport)
+            ->retries(2)
+            ->pauseBetweenRetriesMs(1000);
+
+        // action
+        $response = $client
+            ->url("https://httpbin.org/get")
+            ->get();
+
+        // assert
+        $this->assertEquals(3, $transport->numberOfCalls());
+
+        // one more time...
+        $transport = (new TransportMockFailingDNS())->setResponse($response_200)->failDnsTimes(2);
+
+        // action
+        $response = $client
+            ->useTransport($transport)
+            ->url("https://httpbin.org/get")
+            ->get();
+
+        // assert
+        $this->assertEquals(3, $transport->numberOfCalls());
     }
 }

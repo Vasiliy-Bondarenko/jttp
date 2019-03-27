@@ -7,14 +7,18 @@ class Jttp
     /** @var array */
     protected $urls = [];
     protected $body_format = BodyFormat::JSON;
-    protected $redirects = 5;
     /** @var resource */
     protected $log_handler;
     protected $verbose = false;
-    protected $retries = 0;
     protected $pauseBetweenRetriesMs = 0;
     /** @var Response */
     protected $response_object;
+
+    protected $redirects = 5;
+    protected $redirects_counter = 0;
+
+    protected $retries = 0;
+    protected $retries_counter = 0;
 
     public function __construct()
     {
@@ -33,7 +37,7 @@ class Jttp
 
     public function url(string $url)
     {
-        $this->urls[] = $url;
+        $this->urls[0] = $url;
         return $this;
     }
 
@@ -112,9 +116,10 @@ class Jttp
      * @param int $count
      * @return $this
      */
-    public function maxRedirects(int $count)
+    public function redirects(int $count)
     {
         $this->redirects = $count;
+        $this->redirects_counter = $count;
         return $this;
     }
 
@@ -124,6 +129,7 @@ class Jttp
      */
     public function doNotFollowRedirects()
     {
+        $this->redirects_counter = 0;
         $this->redirects = 0;
         return $this;
     }
@@ -164,7 +170,15 @@ class Jttp
             $data = json_encode($data);
         }
 
-        return $this->call_url_with_retries($this->urls[0], $method, $data);
+        $response = $this->callUrlWithRetries($this->urls[0], $method, $data);
+        $this->resetCounters();
+        return $response;
+    }
+
+    protected function resetCounters()
+    {
+        $this->retries_counter = $this->retries;
+        $this->redirects_counter = $this->redirects;
     }
 
     /**
@@ -176,7 +190,7 @@ class Jttp
      * @throws JttpException
      * @throws TransportException
      */
-    protected function call_url_with_retries(string $url, string $method, $data = null): Response
+    protected function callUrlWithRetries(string $url, string $method, $data = null): Response
     {
         try {
             return $this->call_url($url, $method, $data);
@@ -187,14 +201,14 @@ class Jttp
             }
 
             // run out of retries
-            if ($this->retries <= 0) {
+            if ($this->retries_counter <= 0) {
                 throw $e;
             }
 
             // retry
-            $this->retries--;
+            $this->retries_counter--;
             usleep($this->pauseBetweenRetriesMs * 1000);
-            return $this->call_url_with_retries($url, $method, $data);
+            return $this->callUrlWithRetries($url, $method, $data);
         }
     }
 
@@ -214,15 +228,17 @@ class Jttp
         $response = $this->transport->call($method, $url, $this->body_format, $data, $this->verbose, $this->log_handler);
         
         if (StatusCodes::isSafeToAutoRedirect($response->status())) {
-            if ($this->redirects == 0) {
+            var_dump($this->redirects_counter);
+            var_dump("Going to " . $response->header("Location"));
+            if ($this->redirects_counter == 0) {
                 throw new TooManyRedirectsException($response, "Too many redirects.");
             }
-            $this->redirects--;
+            $this->redirects_counter--;
             return $this->call_url($response->header("Location"), $method, $data);
         }
 
         if (!StatusCodes::isOk($response->status())) {
-            $redir = $this->redirects > 0 ? " or 3xx redirect" : "";
+            $redir = $this->redirects_counter > 0 ? " or 3xx redirect" : "";
             throw new HttpException($response, "Expected result with 2xx success status code{$redir}. Returned: {$response->status()}");
         }
 
@@ -238,6 +254,7 @@ class Jttp
     public function retries(int $times): Jttp
     {
         $this->retries = $times;
+        $this->retries_counter = $times;
         return $this;
     }
 

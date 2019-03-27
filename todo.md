@@ -15,6 +15,7 @@
     - [x] 500 errors 
     - [x] DNS failures 
     - [x] Retry with pause
+- [x] Reset counters when result returned to allow object client reuse
 - [ ] URL rotation and fallbacks
 - [ ] Post as FORM_URLENCODED
 - [ ] Post as TEXT?..

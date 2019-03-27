@@ -13,11 +13,8 @@ Create simple to use http client with minimum dependencies.
 - No magic
 - Strict types where possible 
 - PHP 7.0
-- Assertions included in response for easy use in tests.
-- Documentation embedded in docblocks. You do not need to read documentation in advance.
 - Fully tested
 - Easily extendable
-- Follow redirects by default
 - Throw exception on any error (non-2xx status, too many redirects, json_decode error, etc)
 
 ## Simple example

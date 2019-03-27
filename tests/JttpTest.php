@@ -1,6 +1,8 @@
 <?php namespace Tests;
 
+use Jttp\TransportException;
 use Jttp\HttpException;
+use Jttp\JttpException;
 use Jttp\TooManyRedirectsException;
 use PHPUnit\Framework\TestCase;
 use Jttp\JsonException;
@@ -248,6 +250,21 @@ class JttpTest extends TestCase
             ->url("https://httpbin.org/get")
             ->logToStderr()
             ->get();
+    }
+    /** @test */
+    public function transport_exceptions()
+    {
+        // action
+        try {
+            (new Jttp)
+                ->url("gibberish")
+                ->get();
+        } catch (TransportException $e) {
+            $this->assertInstanceOf(JttpException::class, $e);
+            return;
+        }
+
+        $this->fail("TransportException expected, but not thrown");
     }
 }
 

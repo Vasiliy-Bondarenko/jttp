@@ -8,7 +8,7 @@ interface TransportInterface
      * @param mixed $data
      * @param bool $verbose
      * @return Response
-     * @throws CurlException
+     * @throws TransportException
      */
     public function call(
         string $method,

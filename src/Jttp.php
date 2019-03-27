@@ -28,7 +28,7 @@ class Jttp
 
     /**
      * @return Response
-     * @throws CurlException
+     * @throws TransportException
      * @throws HttpException
      * @throws JttpException
      * @throws TooManyRedirectsException
@@ -41,7 +41,7 @@ class Jttp
     /**
      * @param $data
      * @return Response
-     * @throws CurlException
+     * @throws TransportException
      * @throws HttpException
      * @throws JttpException
      * @throws TooManyRedirectsException
@@ -54,7 +54,7 @@ class Jttp
     /**
      * @param $data
      * @return Response
-     * @throws CurlException
+     * @throws TransportException
      * @throws HttpException
      * @throws JttpException
      * @throws TooManyRedirectsException
@@ -67,7 +67,7 @@ class Jttp
     /**
      * @param $data
      * @return Response
-     * @throws CurlException
+     * @throws TransportException
      * @throws HttpException
      * @throws JttpException
      * @throws TooManyRedirectsException
@@ -80,7 +80,7 @@ class Jttp
     /**
      * @param $data
      * @return Response
-     * @throws CurlException
+     * @throws TransportException
      * @throws HttpException
      * @throws JttpException
      * @throws TooManyRedirectsException
@@ -138,7 +138,7 @@ class Jttp
      * @param string $method
      * @param null $data
      * @return Response
-     * @throws CurlException
+     * @throws TransportException
      * @throws HttpException
      * @throws JttpException
      * @throws TooManyRedirectsException
@@ -161,7 +161,7 @@ class Jttp
      * @param string $method
      * @param null $data
      * @return Response
-     * @throws CurlException
+     * @throws TransportException
      * @throws HttpException
      * @throws TooManyRedirectsException
      */

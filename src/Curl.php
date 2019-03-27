@@ -8,7 +8,7 @@ class Curl implements TransportInterface
      * @param mixed $data
      * @param bool $verbose
      * @return Response
-     * @throws CurlException
+     * @throws TransportException
      */
     public function call(
         string $method,
@@ -21,7 +21,7 @@ class Curl implements TransportInterface
     {
         $ch = curl_init();
         if (!$ch) {
-            throw new CurlException("Can't init curl session");
+            throw new TransportException("Can't init curl session");
         }
 
         // prepare a call
@@ -54,6 +54,10 @@ class Curl implements TransportInterface
         $headers     = substr($response, 0, $header_size);
         $httpcode    = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $body        = substr($response, $header_size);
+
+        if ($err = curl_error($ch)) {
+            throw new TransportException($err);
+        }
 
         // close resource handler
         curl_close($ch);

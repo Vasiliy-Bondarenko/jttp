@@ -7,8 +7,9 @@
 - [x] Log to file
 - [x] Extract verbose arg to method call like (log())
 - [x] All http verbs
-- [ ] Rethrow CurlException
+- [x] Catch Curl errors
 - [ ] Other then 302 redirect codes
+- [ ] Inject Response class to allow extension
 - [ ] Post as FORM_URLENCODED
 - [ ] Post as TEXT?..
 - [ ] Get with data

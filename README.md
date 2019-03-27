@@ -43,7 +43,7 @@ try {
 }
 ```
 ## Other fluid methods
-```
+```php
 ->maxRedirects(5)               // follow maximum 5 redirects
 ->doNotFollowRedirects()
 
@@ -56,23 +56,24 @@ try {
 ->pauseBetweenRetriesMs(1000)   // in milliseconds
 ```
 ## All [http verbs](https://www.restapitutorial.com/lessons/httpmethods.html)
-```
+```php
 ->get()
 ->post($data = null)
 ->put($data = null)
 ->patch($data = null)
 ->delete($data = null)
 ```
+## More complex example
 If you are making a few request or just want to have client with the same setting - you can prepare client and use it many times like this:
-```
+```php
+// prepare http client
+$client = (new Jttp)
+    ->retries(2)
+    ->redirects(5)
+    ->logToFile("log.txt")
+    ->pauseBetweenRetriesMs(1000);
+        
 try {
-    // prepare http client
-    $client = (new Jttp)
-        ->retries(2)
-        ->redirects(5)
-        ->logToFile("log.txt")
-        ->pauseBetweenRetriesMs(1000);
-
     // use it for first request
     echo "Get request: \n";
     $response = $client->url("https://httpbin.org/get")
@@ -90,6 +91,7 @@ try {
     echo "Error: {$e->getMessage()}\n";
 }
 ```
+You can try to run [examples.php](./examples.php) and copy-paste from it.
 
 ## Advanced features
 You will know when you need them :)
@@ -99,7 +101,7 @@ Normally it will happen if need to customize functionality of internal classes o
 Default transport is Curl. But if you want to implement your own transport or extend functionality of this Curl transport - you are free to do it.
 
 #### Extending
-```
+```php
 // extend Curl
 class CustomTransport extends Curl
 {
@@ -113,7 +115,7 @@ $response = (new Jttp)
     ->get();
 ```
 #### Fully custom transport
-```
+```php
 class CustomTransport implements TransportInterface
 {
 
@@ -144,7 +146,7 @@ $response = (new Jttp)
 ```
 
 ## Custom response objects
-```
+```php
 // extend original class
 class CustomResponse extends Response
 {

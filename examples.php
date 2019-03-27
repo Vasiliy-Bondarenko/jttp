@@ -19,15 +19,16 @@ try {
     echo "Error: {$e->getMessage()}\n";
 }
 
-// more complex
-try {
-    // prepare http client
-    $client = (new Jttp)
-        ->retries(2)
-        ->redirects(5)
-        ->logToFile("log.txt")
-        ->pauseBetweenRetriesMs(1000);
+// *** more complex example ***
 
+// prepare http client
+$client = (new Jttp)
+    ->retries(2)
+    ->redirects(5)
+    ->logToFile("log.txt")
+    ->pauseBetweenRetriesMs(1000);
+
+try {
     // use it for first request
     echo "Get request: \n";
     $response = $client->url("https://httpbin.org/get")
@@ -39,7 +40,6 @@ try {
     $response = $client->url("https://httpbin.org/patch")
                        ->patch(["Key" => "value"]);
     var_dump($response->json());
-
 } catch (JttpException $e) {
     // it will catch all errors here including non 2xx response codes and json_decode errors, too many redirects, etc
     echo "Error: {$e->getMessage()}\n";
